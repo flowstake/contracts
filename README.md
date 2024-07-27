@@ -13,7 +13,7 @@ Users can attest to the activity by submitting photos.
 ### Staking Logic
 Users can stake tokens based on their activities.
 
-Here's a simplified version of such a contract:
+Here's a version of such a contract:
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -22,33 +22,33 @@ pragma solidity ^0.8.0;
 contract ProofOfActivityStake {
     // Struct to store activity details
     struct Activity {
-        string stravaId;        // Unique identifier for the Strava activity
-        address user;           // Address of the user who completed the activity
-        string activityData;    // Data of the activity (e.g., distance, duration)
-        bool isCompleted;       // Flag indicating if the activity is completed
-        uint256 stakedAmount;   // Amount of tokens staked on the activity
-        string photoHash;       // Hash of the photo for P2P attestation
+        string stravaActivityId;  // Unique identifier for the Strava activity
+        address user;             // Address of the user who completed the activity
+        string activityData;      // Data of the activity (e.g., distance, duration)
+        bool isCompleted;         // Flag indicating if the activity is completed
+        uint256 stakedAmount;     // Amount of tokens staked on the activity
+        string photoHash;         // Hash of the photo for P2P attestation
     }
 
-    // Mapping from Strava ID to Activity details
+    // Mapping from Strava activity ID to Activity details
     mapping(string => Activity) public activities;
     // Mapping from user address to their staked token amount
     mapping(address => uint256) public stakes;
 
     // Event emitted when an activity is completed
-    event ActivityCompleted(string indexed stravaId, address indexed user, string activityData);
+    event ActivityCompleted(string indexed stravaActivityId, address indexed user, string activityData);
     // Event emitted when an activity is attested with a photo
-    event ActivityAttested(string indexed stravaId, address indexed user, string photoHash);
+    event ActivityAttested(string indexed stravaActivityId, address indexed user, string photoHash);
     // Event emitted when tokens are staked on an activity
     event TokensStaked(address indexed user, uint256 amount);
 
     // Function to mark an activity as completed
-    function completeActivity(string memory stravaId, string memory activityData) public {
+    function completeActivity(string memory stravaActivityId, string memory activityData) public {
         require(bytes(activityData).length > 0, "Activity data cannot be empty");
 
         // Store the activity details in the mapping
-        activities[stravaId] = Activity({
-            stravaId: stravaId,
+        activities[stravaActivityId] = Activity({
+            stravaActivityId: stravaActivityId,
             user: msg.sender,
             activityData: activityData,
             isCompleted: true,
@@ -57,12 +57,12 @@ contract ProofOfActivityStake {
         });
 
         // Emit an event for activity completion
-        emit ActivityCompleted(stravaId, msg.sender, activityData);
+        emit ActivityCompleted(stravaActivityId, msg.sender, activityData);
     }
 
     // Function for users to attest to their activity with a photo
-    function attestActivity(string memory stravaId, string memory photoHash) public {
-        Activity storage activity = activities[stravaId];
+    function attestActivity(string memory stravaActivityId, string memory photoHash) public {
+        Activity storage activity = activities[stravaActivityId];
         require(activity.isCompleted, "Activity not completed");
         require(activity.user == msg.sender, "Only the user who completed the activity can attest");
 
@@ -70,12 +70,12 @@ contract ProofOfActivityStake {
         activity.photoHash = photoHash;
 
         // Emit an event for activity attestation
-        emit ActivityAttested(stravaId, msg.sender, photoHash);
+        emit ActivityAttested(stravaActivityId, msg.sender, photoHash);
     }
 
     // Function for users to stake tokens on their completed activity
-    function stakeTokens(string memory stravaId, uint256 amount) public {
-        Activity storage activity = activities[stravaId];
+    function stakeTokens(string memory stravaActivityId, uint256 amount) public {
+        Activity storage activity = activities[stravaActivityId];
         require(activity.isCompleted, "Activity not completed");
         require(activity.user == msg.sender, "Only the user who completed the activity can stake tokens");
 
@@ -88,6 +88,7 @@ contract ProofOfActivityStake {
     }
 }
 ```
+
 # Key Functionalities of the ProofOfActivityStake Contract
 
 ## Overview
@@ -103,7 +104,7 @@ The `ProofOfActivityStake` contract is designed to integrate with Strava activit
 #### Function: `completeActivity`
 - **Purpose:** To record the completion of an activity from Strava.
 - **Inputs:**
-  - `stravaId`: A unique identifier for the Strava activity.
+  - `stravaActivityId`: A unique identifier for the Strava activity.
   - `activityData`: Details about the activity (e.g., distance, duration).
 - **Behavior:**
   - Validates that the activity data is not empty.
@@ -116,7 +117,7 @@ The `ProofOfActivityStake` contract is designed to integrate with Strava activit
 #### Function: `attestActivity`
 - **Purpose:** To allow users to attest to their activity by submitting a photo.
 - **Inputs:**
-  - `stravaId`: The unique identifier for the Strava activity.
+  - `stravaActivityId`: The unique identifier for the Strava activity.
   - `photoHash`: The hash of the photo for attestation.
 - **Behavior:**
   - Ensures the activity is completed and that the user submitting the attestation is the same user who completed the activity.
@@ -128,7 +129,7 @@ The `ProofOfActivityStake` contract is designed to integrate with Strava activit
 #### Function: `stakeTokens`
 - **Purpose:** To enable users to stake tokens based on their completed activities.
 - **Inputs:**
-  - `stravaId`: The unique identifier for the Strava activity.
+  - `stravaActivityId`: The unique identifier for the Strava activity.
   - `amount`: The amount of tokens to be staked.
 - **Behavior:**
   - Ensures the activity is completed and that the user staking tokens is the same user who completed the activity.
@@ -141,7 +142,8 @@ The `ProofOfActivityStake` contract is designed to integrate with Strava activit
 - `TokensStaked`: Emitted when tokens are staked on an activity.
 
 ## Mappings
-- `activities`: Stores the details of each activity, indexed by `stravaId`.
+- `activities`: Stores the details of each activity, indexed by `stravaActivityId`.
 - `stakes`: Tracks the total amount of tokens staked by each user.
 
 By utilizing these functionalities, the `ProofOfActivityStake` contract ensures a comprehensive system for recording, verifying, and staking on Strava activities, enhancing user engagement and accountability.
+
