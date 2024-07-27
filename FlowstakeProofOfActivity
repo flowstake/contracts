@@ -1,0 +1,86 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract FlowstakeProofOfActivity {
+    struct Stake {
+        address user;
+        uint256 amount;
+        uint256 distance;
+        uint256 duration;
+        bool isDistanceBased;
+        bool completed;
+    }
+
+    mapping(address => Stake) public stakes;
+    address public owner;
+
+    event Staked(address indexed user, uint256 amount, uint256 distance, uint256 duration, bool isDistanceBased);
+    event Completed(address indexed user, uint256 amount);
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
+        _;
+    }
+
+    modifier stakeExists(address user) {
+        require(stakes[user].amount > 0, "Stake does not exist");
+        _;
+    }
+
+    function stakeForDistance(uint256 distance) external payable {
+        require(msg.value > 0, "Stake amount should be greater than zero");
+        require(stakes[msg.sender].amount == 0, "Active stake already exists");
+
+        stakes[msg.sender] = Stake({
+            user: msg.sender,
+            amount: msg.value,
+            distance: distance,
+            duration: 0,
+            isDistanceBased: true,
+            completed: false
+        });
+
+        emit Staked(msg.sender, msg.value, distance, 0, true);
+    }
+
+    function stakeForDuration(uint256 duration) external payable {
+        require(msg.value > 0, "Stake amount should be greater than zero");
+        require(stakes[msg.sender].amount == 0, "Active stake already exists");
+
+        stakes[msg.sender] = Stake({
+            user: msg.sender,
+            amount: msg.value,
+            distance: 0,
+            duration: duration,
+            isDistanceBased: false,
+            completed: false
+        });
+
+        emit Staked(msg.sender, msg.value, 0, duration, false);
+    }
+
+    function completeStake() external stakeExists(msg.sender) {
+        require(!stakes[msg.sender].completed, "Stake already completed");
+
+        // In a real-world scenario, you'd integrate with a trusted oracle to verify the activity.
+        // Here, we assume the activity is always verified correctly.
+
+        stakes[msg.sender].completed = true;
+
+        payable(msg.sender).transfer(stakes[msg.sender].amount);
+
+        emit Completed(msg.sender, stakes[msg.sender].amount);
+    }
+
+    function getStake(address user) external view returns (Stake memory) {
+        return stakes[user];
+    }
+
+    function withdraw() external onlyOwner {
+        payable(owner).transfer(address(this).balance);
+    }
+}
