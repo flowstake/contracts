@@ -88,3 +88,60 @@ contract ProofOfActivityStake {
     }
 }
 ```
+# Key Functionalities of the ProofOfActivityStake Contract
+
+## Overview
+The `ProofOfActivityStake` contract is designed to integrate with Strava activities, enabling users to:
+1. Record and verify their activities.
+2. Provide peer-to-peer (P2P) attestations with photos.
+3. Stake tokens based on their completed activities.
+
+## Core Functionalities
+
+### Tracking Activity Completion
+
+#### Function: `completeActivity`
+- **Purpose:** To record the completion of an activity from Strava.
+- **Inputs:**
+  - `stravaId`: A unique identifier for the Strava activity.
+  - `activityData`: Details about the activity (e.g., distance, duration).
+- **Behavior:**
+  - Validates that the activity data is not empty.
+  - Creates an `Activity` struct with the provided details and stores it in the `activities` mapping.
+  - Sets `isCompleted` to `true` to indicate the activity is completed.
+  - Emits the `ActivityCompleted` event.
+
+### P2P Attestation
+
+#### Function: `attestActivity`
+- **Purpose:** To allow users to attest to their activity by submitting a photo.
+- **Inputs:**
+  - `stravaId`: The unique identifier for the Strava activity.
+  - `photoHash`: The hash of the photo for attestation.
+- **Behavior:**
+  - Ensures the activity is completed and that the user submitting the attestation is the same user who completed the activity.
+  - Stores the photo hash in the corresponding `Activity` struct.
+  - Emits the `ActivityAttested` event.
+
+### Staking Logic
+
+#### Function: `stakeTokens`
+- **Purpose:** To enable users to stake tokens based on their completed activities.
+- **Inputs:**
+  - `stravaId`: The unique identifier for the Strava activity.
+  - `amount`: The amount of tokens to be staked.
+- **Behavior:**
+  - Ensures the activity is completed and that the user staking tokens is the same user who completed the activity.
+  - Updates the user's total staked tokens and the activity's staked amount.
+  - Emits the `TokensStaked` event.
+
+## Events
+- `ActivityCompleted`: Emitted when an activity is marked as completed.
+- `ActivityAttested`: Emitted when an activity is attested with a photo.
+- `TokensStaked`: Emitted when tokens are staked on an activity.
+
+## Mappings
+- `activities`: Stores the details of each activity, indexed by `stravaId`.
+- `stakes`: Tracks the total amount of tokens staked by each user.
+
+By utilizing these functionalities, the `ProofOfActivityStake` contract ensures a comprehensive system for recording, verifying, and staking on Strava activities, enhancing user engagement and accountability.
