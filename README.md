@@ -1,4 +1,4 @@
-# Creating a Self-Staking Solidity Smart Contract (Strava as the data Oracle)
+# Creating a Self-Staking Solidity Smart Contract (Strava data Oracle)
 
 Creating a self-staking Solidity smart contract connected to the data output of a completed Strava activity with the title "Proof of Activity as a Stake" and including P2P attestation with a photo of the activity involves several components. The contract needs to handle data input from Strava, verify the proof of activity, and manage staking logic. This example will focus on the core functionalities:
 
